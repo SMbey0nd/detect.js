@@ -30,7 +30,69 @@
 	};
 
 	detect = {
+		utils: {
 
+			getCookie: function(name) {
+				if(!name) {
+					return null;
+				}
+
+				name = ' ' + name + '=';
+
+				var i, cookies;
+				cookies = ' ' + d.cookie + ';';
+				if ( (i=cookies.indexOf(name)) >= 0 ) {
+					i += name.length;
+					cookies = cookies.substring(i, cookies.indexOf(';', i));
+					return cookies;
+				}
+
+				return null;
+			},
+
+			setCookie: function(name, subcookies, max_age) {
+				var value=[], k, nameval, c, exp;
+
+				if(!name) {
+					return false;
+				}
+
+				for(k in subcookies) {
+					if(subcookies.hasOwnProperty(k)) {
+						value.push(encodeURIComponent(k) + '=' + encodeURIComponent(subcookies[k]));
+					}
+				}
+
+				value = value.join('&');
+
+				nameval = name + '=' + value;
+
+				c = [nameval, "path=/", "domain=" + impl.site_domain];
+				if(max_age) {
+					exp = new Date();
+					exp.setTime(exp.getTime() + max_age*1000);
+					exp = exp.toGMTString();
+					c.push("expires=" + exp);
+				}
+
+				if ( nameval.length < 4000 ) {
+					d.cookie = c.join('; ');
+					// confirm cookie was set (could be blocked by user's settings, etc.)
+					return ( value === this.getCookie(name) );
+				}
+
+				return false;
+			},
+
+			removeCookie: function(name) {
+				return this.setCookie(name, {}, 0);
+			}
+
+		},
+
+		init: function(){
+			
+		}
 	};
 
 	for(key in detect) {
