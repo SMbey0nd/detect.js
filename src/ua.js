@@ -7,6 +7,7 @@
 // --------------------------------
 // Thanks to:
 //  - boomerang http://lognormal.github.com/boomerang/doc/howtos/index.html
+//  - zepto 
 //
 // TODO: 
 //  - 

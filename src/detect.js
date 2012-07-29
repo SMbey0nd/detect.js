@@ -13,7 +13,7 @@
 
 (function(w) {
 
-	var init, detect, key, d = w.document;
+	var INFO, init, detect, key, d = w.document;
 
 	if(typeof DETECT === "undefined") {
 		DETECT = {};
@@ -24,6 +24,29 @@
 	}
 
 	DETECT.version = "0.1";
+
+	//全局DETECT信息初始化
+	INFO = {
+		Network: {
+			Bandwidth:-1, //单位 kb/s
+			Type:''
+		},
+		UA: {
+			Plat:'',
+			Browser:'',
+			Version:''
+		},
+		Ability: {
+
+		},
+		Hardware: {
+			Resolution: [],
+			Performance: ''
+		},
+		DeviceAPI: {
+
+		}
+	};
 
 	init = {
 
@@ -91,7 +114,11 @@
 		},
 
 		init: function(){
-			
+
+		},
+
+		info: function(){
+
 		}
 	};
 
