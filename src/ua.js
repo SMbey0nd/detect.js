@@ -20,7 +20,9 @@
 	var init = {};
 
 	DETECT.plugins.UA = {
-		
+		init: function(config){
+			DETECT.utils.pluginConfig(init, config, "UA", ["A", "B", "C"]);
+		}
 	}
 
 }(window));

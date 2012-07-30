@@ -27,25 +27,23 @@
 
 	//全局DETECT信息初始化
 	INFO = {
-		Network: {
-			Bandwidth:-1, //单位 kb/s
-			Type:''
+		network: {
+			bandwidth:-1, //单位 kb/s，空值为-1
+			type:''
 		},
-		UA: {
-			Plat:'',
-			Browser:'',
-			Version:''
+		ua: {
+			plat:'',
+			browser:'',
+			version:''
 		},
-		Ability: {
+		ability: {
 
 		},
-		Hardware: {
-			Resolution: [],
-			Performance: ''
+		hardware: {
+			resolution: [],
+			performance: ''
 		},
-		DeviceAPI: {
-
-		}
+		api: {}
 	};
 
 	init = {
@@ -109,11 +107,56 @@
 
 			removeCookie: function(name) {
 				return this.setCookie(name, {}, 0);
+			},
+
+			pluginConfig: function(o, config, plugin_name, properties) {
+				var i, props=0;
+
+				if(!config || !config[plugin_name]) {
+					return false;
+				}
+
+				for(i=0; i<properties.length; i++) {
+					if(typeof config[plugin_name][properties[i]] !== "undefined") {
+						o[properties[i]] = config[plugin_name][properties[i]];
+						props++;
+					}
+				}
+
+				return (props>0);
 			}
 
 		},
 
-		init: function(){
+		init: function(config){
+
+			var k;
+
+			if(!config) {
+				config = {};
+			}
+
+			for(k in this.plugins) {
+
+				if( config[k]
+					&& ("enabled" in config[k])
+					&& config[k].enabled === false
+				) {
+					impl.disabled_plugins[k] = 1;
+					continue;
+				}
+				else if(impl.disabled_plugins[k]) {
+					delete impl.disabled_plugins[k];
+				}
+
+				if(this.plugins.hasOwnProperty(k)
+					&& typeof this.plugins[k].init === "function"
+				) {
+					this.plugins[k].init(config);
+				}
+			}
+
+			return this;
 
 		},
 
@@ -121,6 +164,8 @@
 
 		}
 	};
+
+	detect.INFO = INFO;
 
 	for(key in detect) {
 		if(detect.hasOwnProperty(key)) {
