@@ -32,9 +32,18 @@
 			type:''
 		},
 		ua: {
-			plat:'',
-			browser:'',
-			version:''
+			plat: {
+				name:'',
+				version:''
+			},
+			device: {
+				name:'',
+				version:''
+			},
+			browser: {
+				name:'',
+				version:''
+			}
 		},
 		ability: {
 
@@ -47,7 +56,13 @@
 	};
 
 	init = {
+		beacon_url: "",
 
+		site_domain: w.location.hostname.
+					replace(/.*?([^.]+\.[^.]+)\.?$/, '$1').
+					toLowerCase(),
+
+		user_ip: ''
 	};
 
 	detect = {
@@ -111,7 +126,6 @@
 
 			pluginConfig: function(o, config, plugin_name, properties) {
 				var i, props=0;
-
 				if(!config || !config[plugin_name]) {
 					return false;
 				}
@@ -138,17 +152,21 @@
 
 			for(k in this.plugins) {
 
+				/*
 				if( config[k]
 					&& ("enabled" in config[k])
 					&& config[k].enabled === false
 				) {
-					impl.disabled_plugins[k] = 1;
+					init.disabled_plugins[k] = 1;
 					continue;
 				}
-				else if(impl.disabled_plugins[k]) {
-					delete impl.disabled_plugins[k];
-				}
 
+				else if(init.disabled_plugins[k]) {
+					delete init.disabled_plugins[k];
+				}
+				*/
+
+				//如果有plugin，则执行plugin的init
 				if(this.plugins.hasOwnProperty(k)
 					&& typeof this.plugins[k].init === "function"
 				) {
