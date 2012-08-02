@@ -5,6 +5,7 @@
 	<title>测试</title>
 	<script src="../src/detect.js"></script>
 	<script src="../src/ua.js"></script>
+	<script src="../src/network.js"></script>
 </head>
 <body>	
 	<script>
@@ -17,12 +18,17 @@
 
 	<script>
 		console.log(DETECT.INFO);
+/*
 		var obj=""; 
 
 		for(var i in DETECT.INFO) {
-			obj = obj + "\n "+ i +": " + DETECT.INFO[i];
+			obj = obj + "\n "+ i +": " + DETECT.INFO[i] + '<br/>';
 		}
-		document.write(obj);
+
+*/
+
+		document.write('DETECT.INFO：<br/>'+JSON.stringify(DETECT.INFO));
+
 	</script>
 </body>
 </html>

@@ -28,7 +28,7 @@
 	//全局DETECT信息初始化
 	INFO = {
 		network: {
-			bandwidth:-1, //单位 kb/s，空值为-1
+			brandwidth:-1, //单位 kb/s，空值为-1
 			type:''
 		},
 		ua: {
