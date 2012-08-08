@@ -30,8 +30,8 @@
 
 	var core = {
 		//属性
-		base_url: 'images/', //http://a.tbcdn.cn/xxx
-		timeout: 15, //15000
+		base_url: '../src/images/', //http://a.tbcdn.cn/xxx
+		timeout: 15000, //15000
 
 		//状态
 		results: [],
@@ -72,11 +72,13 @@
 		finish: function(){
 			//计算bw
 			var	bw = this.calculate();
+			var grade = this.grade(bw);
 
 			//setcookies
 			//写入INFO
-			DETECT.INFO.network.brandwidth = 20;
+			DETECT.INFO.network.brandwidth = bw;
 			DETECT.INFO.network.type = 'wifi';
+			DETECT.INFO.network.grade = grade;
 			document.write('DETECT.INFO：<br/>'+JSON.stringify(DETECT.INFO));
 
 			this.complete = true;
@@ -84,8 +86,46 @@
 		},
 		calculate: function(){
 			//计算
-			result = 1;
+			var result = -1,
+				nimgs=0,
+				bw,
+				sum=0,
+				bandwidths=[],
+				r=this.results[0].r;
+			for(i=r.length-1; i>=0 && nimgs<3; i--) {
+				if(!r[i]) {
+					break;
+				}
+				if(r[i].t === null) {
+					continue;
+				}
+				nimgs++;
+				bw = images[i].size*1000/r[i].t; // 字节/秒
+				bandwidths.push(bw);
+			}
+			
+			var n = bandwidths.length;
+			for(j=0; j<n; j++){
+				sum += bandwidths[j];
+				//alert(bandwidths[j]);
+			}
+			result = Math.round(sum/n);
+			console.log('3次平均网速：'+ result +'字节/秒，相当于' + result*8/1000 + 'Kbps');
 			return result;
+		},
+		grade: function(bw){
+			//网速：
+			//低速（2G）：
+			//中速（WIFI/3G）：
+			//高速（WIFI/3G）：
+			var bps = bw*8;
+			if(bps>0 && bps<768000){
+				return 'slow';
+			}else if(bps>=768000 && bps<1500000){
+				return 'medium';
+			}else if(bps>=1500000){
+				return 'fast';
+			}
 		},
 		defer: function(func){
 			var that = this;
