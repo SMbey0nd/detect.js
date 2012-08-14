@@ -1,7 +1,7 @@
 /**
  * @fileOverview 统一环境检测包[Detect] Network网络环境嗅探
  * @author SMbey0nd http://github.com/SMbey0nd
- * @version 0.1
+ * @version 0.2
  * MIT Licensed.
  */
 // --------------------------------
@@ -9,7 +9,10 @@
 //  - boomerang http://lognormal.github.com/boomerang/doc/howtos/index.html
 //
 // TODO: 
-//  - 
+//  - 增加过期时间设置
+//  - 优化图片设置
+//  - 增加webtiming
+//  - 增加延迟细节测量
 
 (function(w) {
 
@@ -38,51 +41,137 @@
 		running: false,
 		aborted: false,
 		complete: false,
-		runs_left: 0,
+		//runs_left: 1,
 
 		//方法
-		img_loaded: function(i, tstart, run, success){
+		//图片加载后的后续处理，定义result集合，写入该图片load时间，超时处理等
+		prefix: function(){
+			var type = this.checktype();
+			DETECT.INFO.network.type = type;
 
+			//读取localstrage
+			var info = this.getLocal('DETECT_INFO');
+			if(info){
+				var bw = info.brandwidth,
+					grade = info.grade;
+				DETECT.INFO.network.brandwidth = parseInt(bw);
+				DETECT.INFO.network.grade = grade;
+				DETECT.utils.print();
+				return;
+			}
+			setTimeout(this.abort, core.timeout);
+			core.defer(core.iterate); //延迟10ms执行iterate //iterate用来初始化result中的r 并执行load_img
+		},
+		getLocal: function(k){
+			var k = localStorage.getItem(k);
+			if(typeof JSON.parse(k) == 'object'){ //TODO：字符串类型异常
+				return JSON.parse(k);
+			}
+		},
+		setLocal: function(k,v){
+			if(typeof v == 'object'){
+				v = JSON.stringify(v);
+			}
+			return localStorage.setItem(k,v);
+		},
+		img_loaded: function(i, tstart, success){ //参数：当前图片序号、开始时间、剩余次数-1(5)、true
+		
+			if(this.results[i])	{	//当前图片已测过 
+				return;
+			}
+
+			// 如果超时，设置下一张图，终止
+			if(success === null) { //当前超时
+				this.results[i+1] = {t:null, state: null}; //设置下一张图
+				return;
+			}
 			var result = {
 					start: tstart,
 					end: new Date().getTime(),
 					t: null,
-					state: success,
-					run: run
+					state: success
 				};
+			// 如果成功则记录时间差
 			if(success) {
-				result.t = result.end-result.start;
+				result.t = result.end - result.start; //如果失败，result.t则是null
 			}
-			this.results[this.nruns-run].r[i] = result;
 
-			// we terminate if an image timed out because that means the connection is
-			// too slow to go to the next image
-			if(i >= images.end-1
-				|| typeof this.results[this.nruns-run].r[i+1] !== "undefined"
+			//私有result写入this.results[0].r[0]
+			this.results[i] = result;
+
+			// 图片加载超时（网速太慢），则跳到下一张
+			if(i >= images.end-1 //当前图片序号是最后一张 或者
+				|| typeof this.results[i+1] !== "undefined" //r[i+1]有值
 			) {
-
-				if(run === this.nruns) {
-					images.start = i;
+				//第一次运行是一个试点来决定我们可以下载的最大图片是什么，然后后续run只下载图像就够了
+				/*
+				if(run === this.nruns) { //如果当前大轮训次数 === 大轮询总次数
+					images.start = i; //images.start 为当前图片序号
+					//alert(i);
 				}
-				this.defer(this.iterate);
+				*/
+				//this.defer(this.iterate); //延迟10ms执行iterate //iterate用来初始化result中的r 并执行load_img
+				this.finish();
 			} else {
-				this.load_img(i+1, run, this.img_loaded);
+				this.load_img(i+1, this.img_loaded); //进入下一张图，执行load_img 参数：当前图片序号+1、剩余次数-1(5)、img_loaded回调
 			}
 		},
 		finish: function(){
 			//计算bw
-			var	bw = this.calculate();
+			var bw = this.calculate();
 			var grade = this.grade(bw);
 
 			//setcookies
 			//写入INFO
 			DETECT.INFO.network.brandwidth = bw;
-			DETECT.INFO.network.type = 'wifi';
 			DETECT.INFO.network.grade = grade;
-			document.write('DETECT.INFO：<br/>'+JSON.stringify(DETECT.INFO));
+			//document.body.innerHTML = ('DETECT.INFO：<br/>'+JSON.stringify(DETECT.INFO));
+			DETECT.utils.print();
+
+			//写入localstorage
+			/*
+			localStorage.setItem('DETECT_INFO_NETWORK', true);
+			localStorage.setItem('DETECT_INFO_NETWORK_BRANDWIDTH', bw);
+			localStorage.setItem('DETECT_INFO_NETWORK_GRADE', grade);
+			*/
+			this.setLocal('DETECT_INFO', {network:true,brandwidth:bw,grade:grade});
+			//console.log(JSON.parse(this.getLocal('DETECT_INFO')));
 
 			this.complete = true;
 			this.running = false;
+		},
+		checktype: function(){
+			//var isOnline = navigator.onLine;
+			var connection = navigator.connection;
+			if(connection){
+				//var onlinetxt = isOnline?'在线':'不在线';
+				var type = '';
+				switch(connection.type){
+					case connection.UNKNOWN:
+						type = 'UNKNOWN';
+						break;
+					case connection.ETHERNET:
+						//type = navigator.connection.ETHERNET + 'ETHERNET';
+						type = 'ETHERNET';
+						break;
+					case connection.WIFI:
+						//type = navigator.connection.WIFI + 'WIFI';
+						type = 'WIFI';
+						break;
+					case connection.CELL_2G:
+						//type = navigator.connection.CELL_2G + '2G';
+						type = '2G';
+						break;
+					case connection.CELL_3G:
+						//type = navigator.connection.CELL_3G + '3G';
+						type = '3G';
+						break;
+				}
+				return type;
+
+			}else{
+				return false;
+			}
 		},
 		calculate: function(){
 			//计算
@@ -91,7 +180,7 @@
 				bw,
 				sum=0,
 				bandwidths=[],
-				r=this.results[0].r;
+				r=this.results;
 			for(i=r.length-1; i>=0 && nimgs<3; i--) {
 				if(!r[i]) {
 					break;
@@ -115,9 +204,9 @@
 		},
 		grade: function(bw){
 			//网速：
-			//低速（2G）：
-			//中速（WIFI/3G）：
-			//高速（WIFI/3G）：
+			//低速（2G）：768000-
+			//中速（WIFI/3G）：768000-1500000
+			//高速（WIFI/3G）：1500000+
 			var bps = bw*8;
 			if(bps>0 && bps<768000){
 				return 'slow';
@@ -127,30 +216,43 @@
 				return 'fast';
 			}
 		},
+
+		//延迟10ms
 		defer: function(func){
 			var that = this;
 			return setTimeout(function(){func.call(that); that=null;}, 10);
 		},
-		load_img: function(i, run, callback){
+		load_img: function(i, callback){ //参数：当前图片序号、剩余次数-1(5)、img_loaded回调
 			var url = this.base_url + images[i].name
-				+ '?t=' + (new Date().getTime()) + Math.random(),	// Math.random() is slow, but we get it before we start the timer
-			    timer = 0, tstart = 0,
-			    img = new Image(),
-			    that = this;
+				+ '?t=' + (new Date().getTime()) + Math.random(), // Math.random() is slow, but we get it before we start the timer
+				timer = 0, tstart = 0,
+				img = new Image(),
+				that = this;
 
-			img.onload = img.onerror = function() {
-				img.onload = img.onerror = null;
-				img = null;
+			//img的onload和定时器同时触发，如果onload在timeout时间内完毕，则清楚定时器，进入正常流
+			//如果超出timeout还没onload，则直接调用callback，成功参数传入null
+			img.onload = function() {
+				img.onload=img.onerror=null;
+				img=null;
+				clearTimeout(timer); //清除定时器
+				if(callback) {
+					callback.call(that, i, tstart, true); //回调img_loaded 参数：this、当前图片序号、开始时间、剩余次数-1(5)、成功
+				}
+				that=callback=null;
+			};
+			img.onerror = function() {
+				img.onload=img.onerror=null;
+				img=null;
 				clearTimeout(timer);
 				if(callback) {
-					callback.call(that, i, tstart, run, true);
+					callback.call(that, i, tstart, false);
 				}
-				that = callback = null;
+				that=callback=null;
 			};
 
-			timer = setTimeout(function() {
+			timer = setTimeout(function() { //在当前images设定的timeout时间后，再执行一个img_loaded回调
 						if(callback) {
-							callback.call(that, i, tstart, run, null);
+							callback.call(that, i, tstart, null);
 						}
 					},
 					images[i].timeout
@@ -161,12 +263,13 @@
 			img.src = url;
 
 		},
-		iterate: function(){
+
+		iterate: function(finish){
 			if(this.aborted) {
 				return false;
 			}
 
-			if(!this.runs_left) {
+			if(finish) { //如果runs_left为0 就结束
 				this.finish();
 			}
 			/*
@@ -175,8 +278,8 @@
 			}
 			*/
 			else {
-				this.results.push({r:[]});
-				this.load_img(images.start, this.runs_left--, this.img_loaded);
+				//this.results.push({}); //初始化一个新的r
+				this.load_img(images.start, this.img_loaded); //参数：当前图片序号、大轮训次数-1去掉、img_loaded回调
 			}
 		}
 	};
@@ -184,7 +287,7 @@
 	DETECT.plugins.network = {
 		init: function(config){
 			DETECT.utils.pluginConfig(core, config, "network");
-			core.runs_left = core.nruns = 5;
+			//core.runs_left = 1;
 
 			//页面加载完成后
 			this.run();
@@ -193,8 +296,7 @@
 		},
 		run: function(){
 			core.running = true;
-			setTimeout(this.abort, core.timeout);
-			core.defer(core.iterate);
+			core.prefix();
 
 			return this;
 		},
