@@ -129,6 +129,10 @@
 				return this.setCookie(name, {}, 0);
 			},
 
+			print: function(){
+				document.body.innerHTML = ('DETECT.INFO：<br/>'+JSON.stringify(DETECT.INFO));
+			},
+
 			pluginConfig: function(o, config, plugin_name, properties) {
 				var i, props=0;
 				if(!config || !config[plugin_name]) {
