@@ -9,7 +9,6 @@
 //  - boomerang http://lognormal.github.com/boomerang/doc/howtos/index.html
 //
 // TODO: 
-//  - 增加过期时间设置
 //  - 优化图片设置
 //  - 增加webtiming
 //  - 增加延迟细节测量
@@ -35,6 +34,7 @@
 		//属性
 		base_url: '../src/images/', //http://a.tbcdn.cn/xxx
 		timeout: 15000, //15000
+		exptime: 86400000, //一天
 
 		//状态
 		results: [],
@@ -51,7 +51,9 @@
 
 			//读取localstrage
 			var info = this.getLocal('DETECT_INFO');
-			if(info){
+
+			//console.log(info);
+			if(info && !this.exp()){ //本地已有数据并且没过期，记入DETECT并退出
 				var bw = info.brandwidth,
 					grade = info.grade;
 				DETECT.INFO.network.brandwidth = parseInt(bw);
@@ -59,19 +61,21 @@
 				DETECT.utils.print();
 				return;
 			}
+			//alert('进入');
 			setTimeout(this.abort, core.timeout);
 			core.defer(core.iterate); //延迟10ms执行iterate //iterate用来初始化result中的r 并执行load_img
+
+		},
+		exp:function(){ //1天=24*60*60*1000=86400000毫秒
+			var now = new Date().getTime(), local = this.getLocal('DETECT_INFO').exptime;
+			return now - local >= this.exptime;
 		},
 		getLocal: function(k){
 			var k = localStorage.getItem(k);
-			if(typeof JSON.parse(k) == 'object'){ //TODO：字符串类型异常
-				return JSON.parse(k);
-			}
+			return JSON.parse(k);
 		},
 		setLocal: function(k,v){
-			if(typeof v == 'object'){
-				v = JSON.stringify(v);
-			}
+			v = JSON.stringify(v);
 			return localStorage.setItem(k,v);
 		},
 		img_loaded: function(i, tstart, success){ //参数：当前图片序号、开始时间、剩余次数-1(5)、true
@@ -134,7 +138,9 @@
 			localStorage.setItem('DETECT_INFO_NETWORK_BRANDWIDTH', bw);
 			localStorage.setItem('DETECT_INFO_NETWORK_GRADE', grade);
 			*/
-			this.setLocal('DETECT_INFO', {network:true,brandwidth:bw,grade:grade});
+			var exptime = new Date().getTime();
+			//console.log(o);
+			this.setLocal('DETECT_INFO', {network:true,brandwidth:bw,grade:grade,exptime:exptime});
 			//console.log(JSON.parse(this.getLocal('DETECT_INFO')));
 
 			this.complete = true;
@@ -181,7 +187,7 @@
 				sum=0,
 				bandwidths=[],
 				r=this.results;
-			for(i=r.length-1; i>=0 && nimgs<3; i--) {
+			for(i=r.length-1; i>=0; i--) {
 				if(!r[i]) {
 					break;
 				}
@@ -199,7 +205,7 @@
 				//alert(bandwidths[j]);
 			}
 			result = Math.round(sum/n);
-			console.log('3次平均网速：'+ result +'字节/秒，相当于' + result*8/1000 + 'Kbps');
+			console.log(nimgs+'次平均网速：'+ result +'字节/秒，相当于' + result*8/1000 + 'Kbps');
 			return result;
 		},
 		grade: function(bw){
