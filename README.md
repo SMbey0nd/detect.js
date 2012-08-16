@@ -30,8 +30,41 @@
 ```js
   	DETECT.init();
 ```
-
-
+### 4.得到全局对象DETECT.INFO
+DETECT.INFO包含如下信息：
+```js
+  INFO = {
+		network: {
+			brandwidth:-1, //带宽，单位 kb/s
+			type:'', //WIFI，3G，2G，ETHERNET，UNKNOWN
+			grade:''
+			//grade等级标准定义：
+			//低：slow：1kbps - 768kbps
+			//中：medium：：768kbps - 1.5mbps
+			//高：fast：1.5mbps+
+		},
+		ua: {
+			plat: {
+				name:'',
+				version:''
+			},
+			device: {
+				name:'',
+				version:''
+			},
+			browser: {
+				name:'',
+				version:''
+			}
+		},
+		ability: {},
+		hardware: {
+			resolution: [],
+			performance: ''
+		},
+		api: {}
+	};
+```
 
 
 
