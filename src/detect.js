@@ -1,7 +1,7 @@
 /**
  * @fileOverview 统一环境检测包[Detect] Core 核心文件，在应用的最初始时加载，保持最简洁，无任何依赖
  * @author SMbey0nd http://github.com/SMbey0nd
- * @version 0.1
+ * @version 0.2.0
  * MIT Licensed.
  */
 // --------------------------------

@@ -1,7 +1,7 @@
 /**
  * @fileOverview 统一环境检测包[Detect] Hardware硬件环境检测
  * @author SMbey0nd http://github.com/SMbey0nd
- * @version 0.1
+ * @version 0.1.0
  * MIT Licensed.
  */
 // --------------------------------

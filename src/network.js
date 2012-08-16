@@ -1,7 +1,7 @@
 /**
  * @fileOverview 统一环境检测包[Detect] Network网络环境嗅探
  * @author SMbey0nd http://github.com/SMbey0nd
- * @version 0.2
+ * @version 0.3.0
  * MIT Licensed.
  */
 // --------------------------------
@@ -9,7 +9,7 @@
 //  - boomerang http://lognormal.github.com/boomerang/doc/howtos/index.html
 //
 // TODO: 
-//  - 优化图片设置
+//  - JSON.parse在Android webkit不支持
 //  - 增加webtiming
 //  - 增加延迟细节测量
 
@@ -19,21 +19,24 @@
 	DETECT.plugins = DETECT.plugins || {};
 
 	var images = [
-		{ name: "image-0.png", size: 11483, timeout: 1400 },
-		{ name: "image-1.png", size: 40658, timeout: 1200 },
-		{ name: "image-2.png", size: 164897, timeout: 1300 },
-		{ name: "image-3.png", size: 381756, timeout: 1500 },
-		{ name: "image-4.png", size: 1234664, timeout: 1200 },
+		{ name: "http://img03.taobaocdn.com/tps/i3/T1BtjyXklrXXb1Lcfp-79-79.png", size: 1917, timeout: 1000 }, //16kbps - 2k
+		{ name: "http://img04.taobaocdn.com/tps/i4/T1ZFDzXexnXXb4cIw0-234-235.png", size: 6530, timeout: 1000 }, //56kbps - 7k
+		{ name: "http://img01.taobaocdn.com/tps/i1/T1WJ6EXbBfXXa1ifwv-430-430.png", size: 15870, timeout: 1000 }, //128kbps - 16k
+		{ name: "http://img02.taobaocdn.com/tps/i2/T1zYruXfpsXXbeVw2E-1050-1050.png", size: 47613, timeout: 1000 }, //384kbps - 48k
+		{ name: "http://img03.taobaocdn.com/tps/i3/T1AGPFXblcXXXCgvj2-1400-1400.png", size: 64390, timeout: 1000 } //512kbps - 64k
+		/*
 		{ name: "image-5.png", size: 4509613, timeout: 1200 },
 		{ name: "image-6.png", size: 9084559, timeout: 1200 }
+		// image-l.gif http://img04.taobaocdn.com/tps/i4/T13ivDXhNmXXc6Yc2r-1-1.gif
+		*/
 	];
 	images.end = images.length;
 	images.start = 0;
 
 	var core = {
 		//属性
-		base_url: '../src/images/', //http://a.tbcdn.cn/xxx
-		timeout: 15000, //15000
+		base_url: '', // ../src/images/
+		timeout: 7000, //15000
 		exptime: 86400000, //一天
 
 		//状态
@@ -72,7 +75,7 @@
 		},
 		getLocal: function(k){
 			var k = localStorage.getItem(k);
-			return JSON.parse(k);
+			return JSON.parse(k); //TODO：Android webkit不支持
 		},
 		setLocal: function(k,v){
 			v = JSON.stringify(v);
@@ -84,11 +87,13 @@
 				return;
 			}
 
+			/*
 			// 如果超时，设置下一张图，终止
 			if(success === null) { //当前超时
 				this.results[i+1] = {t:null, state: null}; //设置下一张图
 				return;
 			}
+			*/
 			var result = {
 					start: tstart,
 					end: new Date().getTime(),
@@ -139,6 +144,7 @@
 			localStorage.setItem('DETECT_INFO_NETWORK_GRADE', grade);
 			*/
 			var exptime = new Date().getTime();
+			alert(1)
 			//console.log(o);
 			this.setLocal('DETECT_INFO', {network:true,brandwidth:bw,grade:grade,exptime:exptime});
 			//console.log(JSON.parse(this.getLocal('DETECT_INFO')));
@@ -210,15 +216,15 @@
 		},
 		grade: function(bw){
 			//网速：
-			//低速（2G）：768000-
-			//中速（WIFI/3G）：768000-1500000
-			//高速（WIFI/3G）：1500000+
+			//低速（2G）：76.8kbps-
+			//中速（WIFI/3G）：76.8kbps-150kbps
+			//高速（WIFI/3G）：150kbps+
 			var bps = bw*8;
-			if(bps>0 && bps<768000){
+			if(bps>0 && bps<76800){
 				return 'slow';
-			}else if(bps>=768000 && bps<1500000){
+			}else if(bps>=76800 && bps<150000){
 				return 'medium';
-			}else if(bps>=1500000){
+			}else if(bps>=150000){
 				return 'fast';
 			}
 		},
@@ -309,6 +315,7 @@
 		abort: function(){
 			core.aborted = true;
 			if(core.running) core.finish();
+			console.log('总体超时退出');
 			return this;
 		}
 	};
