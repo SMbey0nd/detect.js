@@ -65,8 +65,10 @@ DETECT.INFO包含如下信息：
 		api: {}
 	};
 ```
-
-
+### 5.取得某一个你想要的信息：
+```js
+var info = DETECT.INFO.network.type //'WIFI'
+```
 
 
 
