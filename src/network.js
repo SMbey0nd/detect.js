@@ -8,8 +8,10 @@
 // Thanks to:
 //  - boomerang http://lognormal.github.com/boomerang/doc/howtos/index.html
 //
+// 0.3.0：
+//  - 新增图片连续测速失败则退出的逻辑处理，增加离线判断逻辑，修复若干BUG
+//
 // TODO: 
-//  - JSON.parse在Android webkit不支持
 //  - 增加webtiming
 //  - 增加延迟细节测量
 
@@ -19,11 +21,11 @@
 	DETECT.plugins = DETECT.plugins || {};
 
 	var images = [
-		{ name: "http://img03.taobaocdn.com/tps/i3/T1BtjyXklrXXb1Lcfp-79-79.png", size: 1917, timeout: 1000 }, //16kbps - 2k
-		{ name: "http://img04.taobaocdn.com/tps/i4/T1ZFDzXexnXXb4cIw0-234-235.png", size: 6530, timeout: 1000 }, //56kbps - 7k
-		{ name: "http://img01.taobaocdn.com/tps/i1/T1WJ6EXbBfXXa1ifwv-430-430.png", size: 15870, timeout: 1000 }, //128kbps - 16k
-		{ name: "http://img02.taobaocdn.com/tps/i2/T1zYruXfpsXXbeVw2E-1050-1050.png", size: 47613, timeout: 1000 }, //384kbps - 48k
-		{ name: "http://img03.taobaocdn.com/tps/i3/T1AGPFXblcXXXCgvj2-1400-1400.png", size: 64390, timeout: 1000 } //512kbps - 64k
+		{ name: "http://img03.taobaocdn.com/tps/i3/T1BtjyXklrXXb1Lcfp-79-79.png", size: 1917, timeout: 1200 }, //16kbps - 2k
+		{ name: "http://img04.taobaocdn.com/tps/i4/T1ZFDzXexnXXb4cIw0-234-235.png", size: 6530, timeout: 1200 }, //56kbps - 7k
+		{ name: "http://img01.taobaocdn.com/tps/i1/T1WJ6EXbBfXXa1ifwv-430-430.png", size: 15870, timeout: 1200 }, //128kbps - 16k
+		{ name: "http://img02.taobaocdn.com/tps/i2/T1zYruXfpsXXbeVw2E-1050-1050.png", size: 47613, timeout: 1200 }, //384kbps - 48k
+		{ name: "http://img03.taobaocdn.com/tps/i3/T1AGPFXblcXXXCgvj2-1400-1400.png", size: 64390, timeout: 1200 } //512kbps - 64k
 		/*
 		{ name: "image-5.png", size: 4509613, timeout: 1200 },
 		{ name: "image-6.png", size: 9084559, timeout: 1200 }
@@ -38,6 +40,7 @@
 		base_url: '', // ../src/images/
 		timeout: 7000, //15000
 		exptime: 86400000, //一天
+		ignore_num: 3, //连续几次失败则跳出
 
 		//状态
 		results: [],
@@ -52,6 +55,9 @@
 			var type = this.checktype();
 			DETECT.INFO.network.type = type;
 
+			var online = this.checkonline();
+			DETECT.INFO.network.online = online;
+
 			//读取localstrage
 			var info = this.getLocal('DETECT_INFO');
 
@@ -62,10 +68,17 @@
 				DETECT.INFO.network.brandwidth = parseInt(bw);
 				DETECT.INFO.network.grade = grade;
 				DETECT.utils.print();
+				console.log('读取localstrage');
 				return;
 			}
-			//alert('进入');
-			setTimeout(this.abort, core.timeout);
+
+			//如果本地没有数据，并且是离线状态，直接退出
+			if(online == 'offline'){
+				return;
+			}
+
+			//alert(this.timeout);
+			setTimeout(DETECT.plugins.network.abort, this.timeout);
 			core.defer(core.iterate); //延迟10ms执行iterate //iterate用来初始化result中的r 并执行load_img
 
 		},
@@ -75,7 +88,7 @@
 		},
 		getLocal: function(k){
 			var k = localStorage.getItem(k);
-			return JSON.parse(k); //TODO：Android webkit不支持
+			return ((k===null||k==='undefined')?null:JSON.parse(k)); //BUGFIX：Android webkit不支持JSON.parse(null)，会报错，所以增加一层判断
 		},
 		setLocal: function(k,v){
 			v = JSON.stringify(v);
@@ -100,13 +113,29 @@
 					t: null,
 					state: success
 				};
+
 			// 如果成功则记录时间差
 			if(success) {
 				result.t = result.end - result.start; //如果失败，result.t则是null
 			}
 
-			//私有result写入this.results[0].r[0]
 			this.results[i] = result;
+
+			//如果1、2、3的state都是null，则跳出
+			var ignore = this.ignore_num;
+			if(i == ignore-1){ //仅在第3张图时检查
+				var l = [];
+				for(var j=0;j<ignore;j++){
+					l[j] = this.results[j].state;
+				}
+				if(l[0] == l[1] == l[2] == null){
+					console.log(l);
+					console.log('连续'+ignore+'次失败，可能已经掉线');
+					//DETECT.plugins.network.abort();
+					return false;
+				}
+			}
+
 
 			// 图片加载超时（网速太慢），则跳到下一张
 			if(i >= images.end-1 //当前图片序号是最后一张 或者
@@ -144,13 +173,20 @@
 			localStorage.setItem('DETECT_INFO_NETWORK_GRADE', grade);
 			*/
 			var exptime = new Date().getTime();
-			alert(1)
 			//console.log(o);
 			this.setLocal('DETECT_INFO', {network:true,brandwidth:bw,grade:grade,exptime:exptime});
 			//console.log(JSON.parse(this.getLocal('DETECT_INFO')));
 
 			this.complete = true;
 			this.running = false;
+		},
+		checkonline:function(){
+			var online = navigator.onLine;
+			if(navigator.hasOwnProperty('onLine')){
+				return online?'online':'offline';
+			}else{
+				return false;
+			}
 		},
 		checktype: function(){
 			//var isOnline = navigator.onLine;
@@ -315,7 +351,7 @@
 		abort: function(){
 			core.aborted = true;
 			if(core.running) core.finish();
-			console.log('总体超时退出');
+			console.log('超过预设时间：' + core.timeout);
 			return this;
 		}
 	};

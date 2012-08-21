@@ -30,11 +30,12 @@
 		network: {
 			brandwidth:-1, //单位 kb/s，空值为-1
 			type:'',
-			grade:''
+			grade:'',
 			//grade等级标准粗略定义：
 			//低：slow：1kbps - 768kbps
 			//中：medium：：768kbps - 1.5mbps
 			//高：fast：1.5mbps+
+			online:'' //'online'，'offline'，false
 		},
 		ua: {
 			plat: {
