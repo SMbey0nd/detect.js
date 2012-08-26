@@ -1,4 +1,4 @@
-# Detect.js
+# mix.core.util.Detect
 
 ## 统一环境检测包。
 当前版本：V0.2.1

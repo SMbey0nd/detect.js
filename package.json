@@ -3,61 +3,61 @@
     "description" : "basic information detection - core",
     "author" : "wanyan",
     "version" : "0.2.1",
-    "namespace" : "mix/core",
+    "namespace" : "mix/core/util",
     "main" : "./src/detect.js",
 }
 ,{
-    "name" : "detect-ua",
+    "name" : "ua",
     "description" : "basic information detection - ua",
     "author" : "wanyan",
     "version" : "0.1.0",
-    "namespace" : "mix/core/ua",
+    "namespace" : "mix/core/util/detect/ua",
     "main" : "./src/ua.js",
     "dependencies" : {
-    	"mix/core/detect/detect" : "0.2.1"
+    	"mix/core/util/detect" : "0.2.1"
     }
 }
 ,{
-    "name" : "detect-network",
+    "name" : "network",
     "description" : "basic information detection - network",
     "author" : "wanyan",
     "version" : "0.2.1",
-    "namespace" : "mix/core/network",
+    "namespace" : "mix/core/util/detect",
     "main" : "./src/network.js",
     "dependencies" : {
-        "mix/core/detect/detect" : "0.2.1"
+        "mix/core/util/detect" : "0.2.1"
     }
 }
 ,{
-    "name" : "detect-ability",
+    "name" : "ability",
     "description" : "basic information detection - ability",
     "author" : "wanyan",
     "version" : "0.0.1",
-    "namespace" : "mix/core/ability",
+    "namespace" : "mix/core/util/detect",
     "main" : "./src/ability.js",
     "dependencies" : {
-        "mix/core/detect/detect" : "0.2.1"
+        "mix/core/util/detect" : "0.2.1"
     }
 }
 ,{
-    "name" : "detect-deviceapi",
+    "name" : "deviceapi",
     "description" : "basic information detection - deviceapi",
     "author" : "wanyan",
     "version" : "0.0.1",
-    "namespace" : "mix/core/deviceapi",
+    "namespace" : "mix/core/util/detect",
     "main" : "./src/deviceapi.js",
     "dependencies" : {
-        "mix/core/detect/detect" : "0.2.1"
+        "mix/core/util/detect" : "0.2.1"
     }
 }
 ,{
-    "name" : "detect-hardware",
+    "name" : "hardware",
     "description" : "basic information detection - hardware",
     "author" : "wanyan",
     "version" : "0.0.1",
-    "namespace" : "mix/core/hardware",
+    "namespace" : "mix/core/util/detect",
     "main" : "./src/hardware.js",
     "dependencies" : {
-        "mix/core/detect/detect" : "0.2.1"
+        "mix/core/util/detect" : "0.2.1"
     }
 }
