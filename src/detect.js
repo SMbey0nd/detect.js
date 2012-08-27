@@ -131,7 +131,7 @@
 			},
 
 			print: function(){
-				document.body.innerHTML = ('DETECT.INFO：<br/>'+JSON.stringify(DETECT.INFO));
+				document.getElementById('J_DETECT').innerHTML = ('DETECT.INFO：<br/>'+JSON.stringify(DETECT.INFO));
 			},
 
 			pluginConfig: function(o, config, plugin_name, properties) {

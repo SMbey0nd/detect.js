@@ -8,24 +8,30 @@
 // Thanks to:
 //  - boomerang http://lognormal.github.com/boomerang/doc/howtos/index.html
 //
+// 0.3.1：
+//  - 优化图片：1.png换成jpg，减少内存占用、减少电量消耗。2.图片总体积压缩1倍，超时时间减少1倍。
+//
 // 0.3.0：
 //  - 新增图片连续测速失败则退出的逻辑处理，增加离线判断逻辑，修复若干BUG
 //
 // TODO: 
+//  - 缩小优化图片尺寸
 //  - 增加webtiming
-//  - 增加延迟细节测量
+//  - 增加延迟细节测量 - 效仿facebook dopplor，先发一个0K极小图片获得DNS延迟
 
 (function(w) {
 
 	DETECT = DETECT || {};
 	DETECT.plugins = DETECT.plugins || {};
 
+	var IMG_TIMEOUT = 600; //快捷设置统一图片超时时间
 	var images = [
-		{ name: "http://img03.taobaocdn.com/tps/i3/T1BtjyXklrXXb1Lcfp-79-79.png", size: 1917, timeout: 1200 }, //16kbps - 2k
-		{ name: "http://img04.taobaocdn.com/tps/i4/T1ZFDzXexnXXb4cIw0-234-235.png", size: 6530, timeout: 1200 }, //56kbps - 7k
-		{ name: "http://img01.taobaocdn.com/tps/i1/T1WJ6EXbBfXXa1ifwv-430-430.png", size: 15870, timeout: 1200 }, //128kbps - 16k
-		{ name: "http://img02.taobaocdn.com/tps/i2/T1zYruXfpsXXbeVw2E-1050-1050.png", size: 47613, timeout: 1200 }, //384kbps - 48k
-		{ name: "http://img03.taobaocdn.com/tps/i3/T1AGPFXblcXXXCgvj2-1400-1400.png", size: 64390, timeout: 1200 } //512kbps - 64k
+		//TODO：{ name: "image-l.gif", size: 0, timeout: 0}, //16kbps - 2k
+		{ name: "http://img04.taobaocdn.com/tps/i4/T1t._HXjxXXXbGICsI-120-120.jpg", size: 886, timeout: IMG_TIMEOUT }, //16kbps - 1k
+		{ name: "http://img01.taobaocdn.com/tps/i1/T1dD_GXhBgXXakeN3e-390-390.jpg", size: 6530, timeout: IMG_TIMEOUT }, //56kbps - 3.5k
+		{ name: "http://img02.taobaocdn.com/tps/i2/T10MfHXidcXXauBRvZ-618-618.jpg", size: 15870, timeout: IMG_TIMEOUT }, //128kbps - 8k
+		{ name: "http://img03.taobaocdn.com/tps/i3/T1fr2HXdBdXXbwcy7e-950-950.jpg", size: 47613, timeout: IMG_TIMEOUT }, //384kbps - 24k
+		{ name: "http://img04.taobaocdn.com/tps/i4/T1gYrHXjNgXXc1iuUZ-1194-1194.jpg", size: 64390, timeout: IMG_TIMEOUT } //512kbps - 32k
 		/*
 		{ name: "image-5.png", size: 4509613, timeout: 1200 },
 		{ name: "image-6.png", size: 9084559, timeout: 1200 }
@@ -124,11 +130,19 @@
 			//如果1、2、3的state都是null，则跳出
 			var ignore = this.ignore_num;
 			if(i == ignore-1){ //仅在第3张图时检查
-				var l = [];
+				var l = [], hash = {};
 				for(var j=0;j<ignore;j++){
-					l[j] = this.results[j].state;
+					//l[j] = this.results[j].state;
+					l[j] = (this.results[j].state == true ? 1 : 0);
+					hash[l[j]] = (l[j] == 1 ? true: false);
 				}
-				if(l[0] == l[1] == l[2] == null){
+				var n = 0;
+				for(var k in hash){
+					n++;
+				}
+				//console.log(n);
+				//console.log(hash);
+				if(n == 1 && hash[0] && hash[0] == false){
 					console.log(l);
 					console.log('连续'+ignore+'次失败，可能已经掉线');
 					//DETECT.plugins.network.abort();
