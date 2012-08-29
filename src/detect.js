@@ -48,7 +48,8 @@
 			},
 			browser: {
 				name:'',
-				version:''
+				version:'',
+				webkitversion:''
 			}
 		},
 		ability: {
