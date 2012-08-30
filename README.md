@@ -5,43 +5,42 @@
 
 ---
 
-## detect
-环境检测核心文件(core)
+### detect
+	环境检测核心文件(core)
 
 包含以下组件(plugin)：
 
-## Network
-网络状况检测
-## UA
-用户代理检测
-## Ability
-能力检测(incoming)
-## Hardware
-硬件检测(incoming)
-## DeviceAPI
-设备API检测(incoming)
+### Network
+	网络状况检测
+### UA
+	用户代理检测
+### Ability
+	能力检测(incoming)
+### Hardware
+	硬件检测(incoming)
+### DeviceAPI
+	设备API检测(incoming)
 
 ---
 
 ## 用法
-### 1.引入detect.js文件
-### 2.引入需要的组件
-### 3.运行
+	1.引入detect.js文件
+	2.引入需要的组件
+	3.运行
+
 ```js
   	DETECT.init();
 ```
+
 ### 4.得到全局对象DETECT.INFO
 DETECT.INFO包含如下信息：
+
 ```js
   INFO = {
 		network: {
-			brandwidth:-1, //带宽，单位 kb/s
-			type:'', //WIFI，3G，2G，ETHERNET，UNKNOWN
+			brandwidth:-1,
+			type:'',
 			grade:''
-			//grade等级标准定义：
-			//低：slow：1kbps - 768kbps
-			//中：medium：：768kbps - 1.5mbps
-			//高：fast：1.5mbps+
 		},
 		ua: {
 			plat: {
@@ -54,7 +53,8 @@ DETECT.INFO包含如下信息：
 			},
 			browser: {
 				name:'',
-				version:''
+				version:'',
+				webkitversion:''
 			}
 		},
 		ability: {},
@@ -65,6 +65,7 @@ DETECT.INFO包含如下信息：
 		api: {}
 	};
 ```
+
 ### 5.取得某一个你想要的信息：
 ```js
 var info = DETECT.INFO.network.type //'WIFI'
