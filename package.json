@@ -1,63 +1,23 @@
 {
-    "name" : "detect",
-    "description" : "basic information detection - core",
-    "author" : "wanyan",
+    "name" : "mix/core/util/detect",
     "version" : "0.2.1",
-    "namespace" : "mix/core/util",
-    "main" : "./src/detect.js",
-}
-,{
-    "name" : "ua",
-    "description" : "basic information detection - ua",
-    "author" : "wanyan",
-    "version" : "0.1.0",
-    "namespace" : "mix/core/util/detect/ua",
-    "main" : "./src/ua.js",
-    "dependencies" : {
-    	"mix/core/util/detect" : "0.2.1"
-    }
-}
-,{
-    "name" : "network",
-    "description" : "basic information detection - network",
-    "author" : "wanyan",
-    "version" : "0.2.1",
-    "namespace" : "mix/core/util/detect",
-    "main" : "./src/network.js",
-    "dependencies" : {
-        "mix/core/util/detect" : "0.2.1"
-    }
-}
-,{
-    "name" : "ability",
-    "description" : "basic information detection - ability",
-    "author" : "wanyan",
-    "version" : "0.0.1",
-    "namespace" : "mix/core/util/detect",
-    "main" : "./src/ability.js",
-    "dependencies" : {
-        "mix/core/util/detect" : "0.2.1"
-    }
-}
-,{
-    "name" : "deviceapi",
-    "description" : "basic information detection - deviceapi",
-    "author" : "wanyan",
-    "version" : "0.0.1",
-    "namespace" : "mix/core/util/detect",
-    "main" : "./src/deviceapi.js",
-    "dependencies" : {
-        "mix/core/util/detect" : "0.2.1"
-    }
-}
-,{
-    "name" : "hardware",
-    "description" : "basic information detection - hardware",
-    "author" : "wanyan",
-    "version" : "0.0.1",
-    "namespace" : "mix/core/util/detect",
-    "main" : "./src/hardware.js",
-    "dependencies" : {
-        "mix/core/util/detect" : "0.2.1"
+    "description" : "basic information detection - core",    
+    "license" : "MIT",
+    "author" : "wanyan <wanyan.wz@taoobao/com>",
+    "homepage" : "https://github.com/organizations/mixteam",
+    "repository" : {
+        "type": "git",
+        "url": "https://github.com/mixteam/detect.js.git"
+    },
+    "sources" : [
+        "http://spm.assets.m.etao.net:8001"
+    ],
+    "output" : {
+        "detect.js" : ".",
+	"ability.js" : ".",
+	"deviceapi.js" : ".",
+	"hardware.js" : ".",
+	"network.js" : ".",
+	"ua.js" : "."
     }
 }
