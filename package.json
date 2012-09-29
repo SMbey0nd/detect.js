@@ -9,9 +9,6 @@
         "type": "git",
         "url": "https://github.com/mixteam/detect.js.git"
     },
-    "sources" : [
-        "http://spm.assets.m.etao.net:8001"
-    ],
     "output" : {
         "detect.js" : ".",
 	"ability.js" : ".",
